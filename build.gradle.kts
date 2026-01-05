@@ -8,6 +8,7 @@ plugins {
 	jacoco
 	id("com.github.ben-manes.versions") version "0.52.0"
 	id("org.sonarqube") version "7.2.2.6593"
+	id("io.freefair.lombok") version "8.14"
 }
 
 group = "hexlet.code"
@@ -30,6 +31,10 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	runtimeOnly("com.h2database:h2:2.3.232")
+	implementation("org.postgresql:postgresql:42.7.3")
+
 }
 
 sonar {

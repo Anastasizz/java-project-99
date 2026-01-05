@@ -1,3 +1,8 @@
 spring:
   application:
     name: java-project-99
+
+  jpa:
+      show-sql: true
+      hibernate:
+        ddl-auto: update

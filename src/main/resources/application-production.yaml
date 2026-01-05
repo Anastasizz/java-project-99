@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://dpg-d5dr4kq4d50c73fe0t4g-a:5432/prddb_844g
+    username: user
+    password: sUJO6InU3oslmbmy92PGchXdm8NYNVxO
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # в продакшне не меняем схему автоматически
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false              # не показываем SQL в логах продакшна
