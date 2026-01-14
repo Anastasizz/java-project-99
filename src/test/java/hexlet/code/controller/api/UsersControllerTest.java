@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.instancio.Instancio;
@@ -52,23 +54,24 @@ public class UsersControllerTest {
     @Autowired
     private Faker faker;
 
-    private User testUser1;
-    private User testUser2;
+    private User testUser;
+
+    private JwtRequestPostProcessor token;
 
     @BeforeEach
     public void setUp() {
         userRepository.deleteAll();
 
-        testUser1 = userBuild();
-        testUser2 = userBuild();
+        testUser = userBuild();
 
-        userRepository.save(testUser1);
-        userRepository.save(testUser2);
+        userRepository.save(testUser);
+
+        token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
     }
 
     @Test
     public void testIndex() throws Exception {
-        var result = mockMvc.perform(get("/api/users"))
+        var result = mockMvc.perform(get("/api/users").with(token))
                 .andExpect(content().contentType(String.valueOf(MediaType.APPLICATION_JSON)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -87,7 +90,7 @@ public class UsersControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        var result = mockMvc.perform(get("/api/users/" + testUser2.getId()))
+        var result = mockMvc.perform(get("/api/users/" + testUser.getId()).with(token))
                 .andExpect(content().contentType(String.valueOf(MediaType.APPLICATION_JSON)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -95,17 +98,17 @@ public class UsersControllerTest {
         var body = result.getResponse().getContentAsString();
 
         assertThatJson(body).and(
-                json -> json.node("id").isEqualTo(testUser2.getId()),
-                json -> json.node("firstName").isEqualTo(testUser2.getFirstName()),
-                json -> json.node("lastName").isEqualTo(testUser2.getLastName()),
-                json -> json.node("email").isEqualTo(testUser2.getEmail())
+                json -> json.node("id").isEqualTo(testUser.getId()),
+                json -> json.node("firstName").isEqualTo(testUser.getFirstName()),
+                json -> json.node("lastName").isEqualTo(testUser.getLastName()),
+                json -> json.node("email").isEqualTo(testUser.getEmail())
         );
     }
 
     @Test
     public void testCreate() throws Exception {
         var userData = userBuild();
-        var request = post("/api/users")
+        var request = post("/api/users").with(token)
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(om.writeValueAsString(userData));
 
@@ -124,12 +127,12 @@ public class UsersControllerTest {
 
     @Test
     public void testDestroy() throws Exception {
-        assertTrue(userRepository.existsById(testUser1.getId()));
+        assertTrue(userRepository.existsById(testUser.getId()));
 
-        mockMvc.perform(delete("/api/users/" + testUser1.getId()))
+        mockMvc.perform(delete("/api/users/" + testUser.getId()).with(token))
                 .andExpect(status().isNoContent());
 
-        assertFalse(userRepository.existsById(testUser1.getId()));
+        assertFalse(userRepository.existsById(testUser.getId()));
     }
 
     @Test
@@ -137,7 +140,7 @@ public class UsersControllerTest {
         var data = new HashMap<>();
         data.put("firstName", "Lolly");
 
-        var request = put("/api/users/" + testUser2.getId())
+        var request = put("/api/users/" + testUser.getId()).with(token)
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(om.writeValueAsString(data));
 
@@ -145,7 +148,7 @@ public class UsersControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk());
 
-        var updatedUser = userRepository.findById(testUser2.getId()).orElseThrow();
+        var updatedUser = userRepository.findById(testUser.getId()).orElseThrow();
 
         assertThat(updatedUser.getFirstName()).isEqualTo("Lolly");
     }

@@ -2,8 +2,6 @@ package hexlet.code.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.openapitools.jackson.nullable.JsonNullable;
@@ -18,7 +16,6 @@ public class UserUpdateDTO {
     @NotBlank
     @Email
     private JsonNullable<String> email;
-    @NotNull
-    @Size(min = 8)
+    @NotBlank
     private JsonNullable<String> passwordDigest;
 }

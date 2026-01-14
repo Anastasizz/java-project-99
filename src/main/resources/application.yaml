@@ -6,3 +6,8 @@ spring:
       show-sql: true
       hibernate:
         ddl-auto: update
+
+# src/main/resources/certs/
+rsa:
+  private-key: classpath:certs/private.pem
+  public-key: classpath:certs/public.pem
