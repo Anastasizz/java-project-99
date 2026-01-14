@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserService2 {
+public class UserService {
 
     @Autowired
     private UserMapper userMapper;
@@ -27,7 +27,7 @@ public class UserService2 {
     public UserDTO createUser(UserCreateDTO userData) {
         var user = userMapper.map(userData);
 
-        user.setPasswordDigest(passwordEncoder.encode(userData.getPasswordDigest()));
+        user.setPasswordDigest(passwordEncoder.encode(userData.getPassword()));
 
         userRepository.save(user);
         return userMapper.map(user);

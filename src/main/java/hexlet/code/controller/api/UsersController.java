@@ -3,11 +3,12 @@ package hexlet.code.controller.api;
 import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.dto.UserDTO;
 import hexlet.code.dto.UserUpdateDTO;
-import hexlet.code.service.UserService2;
+import hexlet.code.service.UserService;
 import hexlet.code.util.UserUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,35 +28,36 @@ import java.util.List;
 public class UsersController {
 
     @Autowired
-    UserService2 userService2;
+    UserService userService;
 
     @Autowired
     private UserUtils userUtils;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDTO> index() {
-        return userService2.getAllUsers();
+    public ResponseEntity<List<UserDTO>> index() {
+        var users = userService.getAllUsers();
+        return ResponseEntity.ok().header("X-Total-Count", String.valueOf(users.size())).body(users);
 
     }
 
     @GetMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserDTO show(@PathVariable Long id) {
-        return userService2.getUserById(id);
+        return userService.getUserById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDTO create(@Valid @RequestBody UserCreateDTO userData) {
-        return userService2.createUser(userData);
+        return userService.createUser(userData);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("@userUtils.getCurrentUser().getId() == #id")
     public void destroy(@PathVariable Long id) {
-        userService2.deleteUser(id);
+        userService.deleteUser(id);
     }
 
     @PutMapping(path = "/{id}")
@@ -63,7 +65,7 @@ public class UsersController {
     @PreAuthorize("@userUtils.getCurrentUser().getId() == #id")
     public UserDTO update(@PathVariable Long id,
                           @Valid @RequestBody UserUpdateDTO userData) {
-        return userService2.updateUser(userData, id);
+        return userService.updateUser(userData, id);
     }
 
 }

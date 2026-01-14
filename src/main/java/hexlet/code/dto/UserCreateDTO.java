@@ -17,5 +17,5 @@ public class UserCreateDTO {
     private String lastName;
 
     @NotBlank
-    private String passwordDigest;
+    private String password;
 }

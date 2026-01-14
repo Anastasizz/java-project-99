@@ -2,7 +2,7 @@ package hexlet.code.component;
 
 import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.repository.UserRepository;
-import hexlet.code.service.UserService2;
+import hexlet.code.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -17,21 +17,21 @@ public class DataInitializer implements ApplicationRunner {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService2 userService;
+    private UserService userService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         var email = "hexlet@example.com";
         var userData = new UserCreateDTO();
         userData.setEmail(email);
-        userData.setPasswordDigest("qwerty");
+        userData.setPassword("qwerty");
         userService.createUser(userData);
 
         userData = new UserCreateDTO();
         userData.setEmail("anastasia_sviridenkova@mail.ru");
         userData.setFirstName("Lolly");
         userData.setLastName("Mir");
-        userData.setPasswordDigest("kittycat");
+        userData.setPassword("kittycat");
         userService.createUser(userData);
     }
 }
