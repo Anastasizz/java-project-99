@@ -24,9 +24,9 @@ public abstract class UserMapper {
     @Mapping(source = "createdAt", target = "createdAt", dateFormat = "yyyy-MM-dd")
     public abstract User map(UserDTO userDTO);
 
-    @Mapping(source = "password",target = "passwordDigest")
+    @Mapping(source = "password", target = "passwordDigest")
     public abstract User map(UserCreateDTO userData);
 
-    @Mapping(source = "password",target = "passwordDigest")
+    @Mapping(source = "password", target = "passwordDigest")
     public abstract void update(UserUpdateDTO userData, @MappingTarget User user);
 }
