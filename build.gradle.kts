@@ -64,6 +64,17 @@ sonar {
 	}
 }
 
+tasks.test {
+	useJUnitPlatform()
+	testLogging {
+		events("passed", "failed", "skipped", "standard_error", "standard_out")
+		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+		showExceptions = true
+		showCauses = true
+		showStackTraces = true
+	}
+}
+
 tasks.jacocoTestReport { reports { xml.required.set(true) } }
 
 tasks.withType<Test> {

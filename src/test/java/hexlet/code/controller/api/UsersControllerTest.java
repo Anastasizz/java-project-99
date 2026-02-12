@@ -55,7 +55,6 @@ public class UsersControllerTest {
     private Faker faker;
 
     private User testUser;
-
     private JwtRequestPostProcessor token;
 
     @BeforeEach
@@ -78,7 +77,6 @@ public class UsersControllerTest {
 
         var body = result.getResponse().getContentAsString();
 
-        //может все-таки не нужны эти танцы с бубном?
         List<UserDTO> userDTOs = om.readValue(body, new TypeReference<>() { });
         var actual = userDTOs.stream()
                 .map(userDTO -> userMapper.map(userDTO))

@@ -38,10 +38,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/login").permitAll()
-                    .requestMatchers("/welcome").permitAll()
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/index.html").permitAll()
                     .requestMatchers("/assets/**").permitAll()
+                    //.requestMatchers("/api/task_statuses/**").permitAll()
                     .anyRequest().authenticated())
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .oauth2ResourceServer((rs) -> rs.jwt((jwt) -> jwt.decoder(jwtDecoder)))
