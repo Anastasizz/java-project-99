@@ -3,6 +3,7 @@ package hexlet.code.service;
 import hexlet.code.dto.TaskStatusCreateDTO;
 import hexlet.code.dto.TaskStatusDTO;
 import hexlet.code.dto.TaskStatusUpdateDTO;
+import hexlet.code.exception.EntityInUseException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.repository.TaskStatusRepository;
@@ -50,6 +51,10 @@ public class TaskStatusService {
     }
 
     public void deleteTaskStatus(Long id) {
-        taskStatusRepository.deleteById(id);
+        try {
+            taskStatusRepository.deleteById(id);
+        } catch (RuntimeException ex) {
+            throw new EntityInUseException("Status is used in tasks");
+        }
     }
 }

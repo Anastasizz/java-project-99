@@ -1,11 +1,11 @@
 package hexlet.code.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,19 +16,18 @@ import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
+
 import static jakarta.persistence.GenerationType.IDENTITY;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Entity
-@Table(name = "task_statuses")
+@Table(name = "tasks")
 @Getter
 @Setter
-@ToString(exclude = "tasks")
+@ToString(exclude = {"assignee", "taskStatus"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @EntityListeners(AuditingEntityListener.class)
-public class TaskStatus {
+public class Task {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @EqualsAndHashCode.Include
@@ -36,16 +35,20 @@ public class TaskStatus {
 
     @NotNull
     @Size(min = 1)
-    @Column(unique = true)
     private String name;
 
-    @NotNull
-    @Size(min = 1)
-    @Column(unique = true)
-    private String slug;
+    private int index;
 
-    @OneToMany(mappedBy = "taskStatus") //cascade = CascadeType.REMOVE, orphanRemoval = true
-    private List<Task> tasks;
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
+    @ManyToOne
+    @NotNull
+    @JoinColumn(name = "status")
+    private TaskStatus taskStatus;
 
     @CreatedDate
     private LocalDate createdAt;

@@ -1,6 +1,6 @@
 package hexlet.code.model;
 
-
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -47,6 +48,9 @@ public class User implements UserDetails {
 
     @NotBlank
     private String passwordDigest;
+
+    @OneToMany(mappedBy = "assignee") //cascade = CascadeType.REMOVE, orphanRemoval = true
+    private List<Task> tasks;
 
     @CreatedDate
     private LocalDate createdAt;
