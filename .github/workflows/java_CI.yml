@@ -39,10 +39,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonar --info
-      - name: Configure Sentry CLI
-        run: |
-          mkdir -p ~/.sentry-cli
-          echo "[auth]" > ~/.sentry-cli/config
-          echo "token=${{ secrets.SENTRY_AUTH_TOKEN }}" >> ~/.sentry-cli/config
       - name: Upload source bundle to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew sentryUploadSourceBundleJava --info
