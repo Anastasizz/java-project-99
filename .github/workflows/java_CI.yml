@@ -39,7 +39,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonar --info
-      - name: Upload artifacts to Sentry
+      - name: Upload source bundle to Sentry
         env:
-            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: sentry-cli upload-dif
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: ./gradlew sentryUploadSourceBundleJava --info
