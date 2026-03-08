@@ -1,3 +1,7 @@
+repositories {
+	mavenCentral()
+}
+
 plugins {
 	java
 	id("org.springframework.boot") version "3.5.9"
@@ -9,6 +13,7 @@ plugins {
 	id("com.github.ben-manes.versions") version "0.52.0"
 	id("org.sonarqube") version "7.2.2.6593"
 	id("io.freefair.lombok") version "8.14"
+	id("io.sentry.jvm.gradle") version "6.1.0"
 }
 
 group = "hexlet.code"
@@ -19,10 +24,6 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
-}
-
-repositories {
-	mavenCentral()
 }
 
 dependencies {
@@ -50,6 +51,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	testImplementation("org.springframework.security:spring-security-test")
 
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16")
+	implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.33.0")
 }
 
 sonar {
@@ -62,6 +65,17 @@ sonar {
 		property("sonar.sources", "src/main/java")
 		property("sonar.tests", "src/test/java")
 	}
+}
+
+sentry {
+	// Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+	// This enables source context, allowing you to see your source
+	// code as part of your stack traces in Sentry.
+	includeSourceContext = true
+
+	org = "lolly-3r"
+	projectName = "java-spring-boot2"
+	authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 tasks.test {

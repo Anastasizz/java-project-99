@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.TaskDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -58,6 +60,9 @@ public class TaskControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
 
     @Autowired
     private Faker faker;
@@ -152,7 +157,7 @@ public class TaskControllerTest {
     public void testCreate() throws Exception {
         var taskData = taskBuilder();
         taskData.setTaskStatus(testTaskStatus);
-        taskData.setAssignee(testUser);
+        //taskData.setAssignee(testUser);
 
         var taskDTO = taskMapper.map(taskData);
 
@@ -160,9 +165,13 @@ public class TaskControllerTest {
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(om.writeValueAsString(taskDTO));
 
-        mockMvc.perform(request)
-                .andExpect(content().contentType(String.valueOf(MediaType.APPLICATION_JSON)))
-                .andExpect(status().isCreated());
+        log.info("\ntestCreate:taskDTO.assignee {}", taskDTO.getAssigneeId());
+
+        var response = mockMvc.perform(request)
+                            .andExpect(content().contentType(String.valueOf(MediaType.APPLICATION_JSON)))
+                            .andExpect(status().isCreated());
+
+        log.info("\ntestCreate:response {}", response);
 
         var task = taskRepository.findByName(taskData.getName()).orElse(null);
 
@@ -203,6 +212,115 @@ public class TaskControllerTest {
 
     }
 
+    @Test
+    public void testFilterByTitleContains() throws Exception {
+        var matchedTask = taskBuilder();
+        matchedTask.setName("create task");
+        matchedTask.setTaskStatus(testTaskStatus);
+        matchedTask.setAssignee(testUser);
+        taskRepository.save(matchedTask);
+
+        var notMatchedTask = taskBuilder();
+        notMatchedTask.setName("another title");
+        notMatchedTask.setTaskStatus(testTaskStatus);
+        notMatchedTask.setAssignee(testUser);
+        taskRepository.save(notMatchedTask);
+
+        var result = mockMvc.perform(get("/api/tasks")
+                                .param("titleCont", "create").with(token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+
+        assertThat(tasks)
+                .extracting(TaskDTO::getId)
+                .contains(matchedTask.getId())
+                .doesNotContain(notMatchedTask.getId());
+    }
+
+    @Test
+    public void testFilterByLabel() throws Exception {
+        var label = Instancio.of(Label.class)
+                .ignore(Select.field(Label::getId))
+                .supply(Select.field(Label::getName), () -> {
+                    String word;
+                    do {
+                        word = faker.lorem().word();
+                    } while (word.length() < 3);
+                    return word;
+                })
+                .create();
+
+        labelRepository.save(label);
+
+        testTask.setLabels(List.of(label));
+        taskRepository.save(testTask);
+
+        var result = mockMvc.perform(get("/api/tasks")
+                                .param("labelId", String.valueOf(label.getId())).with(token))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+
+        assertThat(tasks)
+                .extracting(TaskDTO::getId)
+                .contains(testTask.getId());
+    }
+
+    @Test
+    public void testFilterByStatus() throws Exception {
+        var anotherStatus = taskStatusBuilder();
+        taskStatusRepository.save(anotherStatus);
+
+        var taskWithAnotherStatus = taskBuilder();
+        taskWithAnotherStatus.setTaskStatus(anotherStatus);
+        taskWithAnotherStatus.setAssignee(testUser);
+        taskRepository.save(taskWithAnotherStatus);
+
+        var result = mockMvc.perform(get("/api/tasks")
+                                .param("status", testTaskStatus.getSlug()).with(token))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+
+        assertThat(tasks)
+                .extracting(TaskDTO::getStatus)
+                .containsOnly(testTaskStatus.getSlug());
+    }
+
+    @Test
+    public void testFilterByAssignee() throws Exception {
+        var anotherUser = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+
+        userRepository.save(anotherUser);
+
+        var taskForAnotherUser = taskBuilder();
+        taskForAnotherUser.setAssignee(anotherUser);
+        taskForAnotherUser.setTaskStatus(testTaskStatus);
+        taskRepository.save(taskForAnotherUser);
+
+        var result = mockMvc.perform(get("/api/tasks")
+                                .param("assigneeId", String.valueOf(testUser.getId())).with(token))
+                                .andExpect(status().isOk())
+                                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+
+        assertThat(tasks)
+                .extracting(TaskDTO::getAssigneeId)
+                .containsOnly(testUser.getId());
+    }
+
     private TaskStatus taskStatusBuilder() {
         return Instancio.of(TaskStatus.class)
                 .ignore(Select.field(TaskStatus::getId))
@@ -216,9 +334,11 @@ public class TaskControllerTest {
         return Instancio.of(Task.class)
                 .ignore(Select.field(Task::getId))
                 .ignore(Select.field(Task::getCreatedAt))
+                .ignore(Select.field(Task::getAssignee))
                 .supply(Select.field(Task::getIndex), () -> faker.number().numberBetween(1, 100))
                 .supply(Select.field(Task::getName), () -> String.join(" ", faker.lorem().words(2)))
                 .supply(Select.field(Task::getDescription), () -> String.join(" ", faker.lorem().words(4)))
+                .ignore(Select.field(Task::getLabels))
                 .create();
     }
 }
