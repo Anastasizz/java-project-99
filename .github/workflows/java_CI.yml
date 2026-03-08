@@ -39,3 +39,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./gradlew sonar --info
+      - name: Upload source bundle to Sentry
+        if: github.event_name == 'push' && env.SENTRY_AUTH_TOKEN != ''
+        run: ./gradlew sentryUploadSourceBundleJava --info
