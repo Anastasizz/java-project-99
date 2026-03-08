@@ -42,4 +42,4 @@ jobs:
       - name: Upload source bundle to Sentry
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} ./gradlew sentryUploadSourceBundleJava --info
+        run: export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} ./gradlew sentryUploadSourceBundleJava --info --log-level=debug
