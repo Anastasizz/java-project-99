@@ -2,7 +2,9 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.dto.TaskCreateDTO;
 import hexlet.code.dto.TaskDTO;
+import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Label;
@@ -13,6 +15,7 @@ import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
@@ -20,6 +23,7 @@ import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.MediaType;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -183,6 +188,23 @@ public class TaskControllerTest {
     }
 
     @Test
+    public void testCreateWithNonExistingUser() throws Exception {
+
+        var dto = new TaskCreateDTO();
+        dto.setTitle("task");
+        dto.setIndex(1);
+        dto.setStatus(testTaskStatus.getSlug());
+        dto.setAssigneeId(99999L);
+
+        var request = post("/api/tasks").with(token)
+                .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                .content(om.writeValueAsString(dto));
+
+        mockMvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void testDestroy() throws Exception {
         var request = delete("/api/tasks/" + testTask.getId()).with(token);
 
@@ -192,7 +214,7 @@ public class TaskControllerTest {
     }
 
     @Test
-    public void testUpdate() throws Exception {
+    public void testUpdateTitle() throws Exception {
         var data = new HashMap<>();
         data.put("title", "New Task's title");
 
@@ -210,6 +232,52 @@ public class TaskControllerTest {
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id: " + taskId + " does not exist!"));
         assertThat(updTaskStatus.getName()).isEqualTo("New Task's title");
 
+    }
+
+    @Test
+    public void testUpdateAssignee() throws Exception {
+
+        var anotherUser = Instancio.of(User.class)
+                .ignore(Select.field(User::getId))
+                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .create();
+
+        userRepository.save(anotherUser);
+
+        var dto = new TaskUpdateDTO();
+        dto.setAssigneeId(JsonNullable.of(anotherUser.getId()));
+
+        mockMvc.perform(put("/api/tasks/" + testTask.getId())
+                        .with(token)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content(om.writeValueAsString(dto)))
+                .andExpect(status().isOk());
+
+        var updated = taskRepository.findById(testTask.getId()).orElseThrow();
+
+        assertThat(updated.getAssignee().getId())
+                .isEqualTo(anotherUser.getId());
+    }
+
+    @Test
+    public void testUpdateStatus() throws Exception {
+
+        var newStatus = taskStatusBuilder();
+        taskStatusRepository.save(newStatus);
+
+        var data = new HashMap<>();
+        data.put("status", newStatus.getSlug());
+
+        mockMvc.perform(put("/api/tasks/" + testTask.getId())
+                        .with(token)
+                        .contentType(String.valueOf(MediaType.APPLICATION_JSON))
+                        .content(om.writeValueAsString(data)))
+                .andExpect(status().isOk());
+
+        var updated = taskRepository.findById(testTask.getId()).orElseThrow();
+
+        assertThat(updated.getTaskStatus().getSlug())
+                .isEqualTo(newStatus.getSlug());
     }
 
     @Test

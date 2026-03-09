@@ -35,7 +35,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
+           // CSRF disabled because the application is a stateless REST API using JWT
+            .csrf(AbstractHttpConfigurer::disable) //NOSONAR
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/login").permitAll()
                     .requestMatchers("/").permitAll()
