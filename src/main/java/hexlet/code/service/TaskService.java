@@ -53,7 +53,7 @@ public class TaskService {
     public TaskDTO createTask(TaskCreateDTO taskData) {
         var assigneeId = taskData.getAssigneeId();
         var slug = taskData.getStatus();
-        var labelIds = taskData.getLabelIds();
+        var labelIds = taskData.getTaskLabelIds();
 
         var task = taskMapper.map(taskData);
 
@@ -107,8 +107,8 @@ public class TaskService {
             task.setTaskStatus(status);
         }
 
-        if (taskData.getLabelIds() != null && taskData.getLabelIds().isPresent()) {
-            var labelIds = taskData.getLabelIds().get();
+        if (taskData.getTaskLabelIds() != null && taskData.getTaskLabelIds().isPresent()) {
+            var labelIds = taskData.getTaskLabelIds().get();
 
             var labels = labelIds.stream()
                             .map(labelId -> labelRepository.findById(labelId).orElseThrow(
