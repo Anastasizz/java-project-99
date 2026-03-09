@@ -19,7 +19,8 @@ public class TaskSpecification {
     }
 
     private Specification<Task> withAssigneeId(Long assigneeId) {
-        return (root, query, cb) -> assigneeId == null ? cb.conjunction() : cb.equal(root.get("assignee").get("id"), assigneeId);
+        return (root, query, cb) -> assigneeId == null ? cb.conjunction()
+                                      : cb.equal(root.get("assignee").get("id"), assigneeId);
     }
 
     private Specification<Task> withTitleCont(String titleCont) {

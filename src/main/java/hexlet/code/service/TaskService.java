@@ -6,7 +6,6 @@ import hexlet.code.dto.TaskParamsDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
-import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
@@ -14,10 +13,7 @@ import hexlet.code.repository.UserRepository;
 import hexlet.code.specification.TaskSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +57,7 @@ public class TaskService {
 
         var task = taskMapper.map(taskData);
 
-        if(assigneeId != null) {
+        if (assigneeId != null) {
             var user = userRepository.findById(assigneeId)
                     .orElseThrow(() -> new ResourceNotFoundException("User with id: "
                             + assigneeId + " does not exist!"));
@@ -73,7 +69,7 @@ public class TaskService {
                         + slug + " does not exist!"));
         task.setTaskStatus(status);
 
-        if(labelIds != null) {
+        if (labelIds != null) {
             var labels = labelIds.stream()
                     .map(id -> labelRepository.findById(id).orElseThrow(
                             () -> new ResourceNotFoundException("Label with id: "
@@ -93,7 +89,7 @@ public class TaskService {
 
         if (taskData.getAssigneeId() != null && taskData.getAssigneeId().isPresent()) {
             var assigneeId = taskData.getAssigneeId().get();
-            if(assigneeId == null) {
+            if (assigneeId == null) {
                 task.setAssignee(null);
             } else {
                 var user = userRepository.findById(assigneeId)

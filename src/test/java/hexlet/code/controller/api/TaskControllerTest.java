@@ -232,7 +232,7 @@ public class TaskControllerTest {
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() { });
 
         assertThat(tasks)
                 .extracting(TaskDTO::getId)
@@ -264,7 +264,7 @@ public class TaskControllerTest {
                                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() { });
 
         assertThat(tasks)
                 .extracting(TaskDTO::getId)
@@ -287,7 +287,7 @@ public class TaskControllerTest {
                                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() { });
 
         assertThat(tasks)
                 .extracting(TaskDTO::getStatus)
@@ -314,7 +314,7 @@ public class TaskControllerTest {
                                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
-        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() {});
+        List<TaskDTO> tasks = om.readValue(body, new TypeReference<>() { });
 
         assertThat(tasks)
                 .extracting(TaskDTO::getAssigneeId)
