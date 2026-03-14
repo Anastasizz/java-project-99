@@ -71,6 +71,7 @@ sentry {
 	// This enables source context, allowing you to see your source
 	// code as part of your stack traces in Sentry.
 	includeSourceContext = true
+	autoUploadSourceContext = false
 
 	org = "lolly-3r"
 	projectName = "java-spring-boot2"
