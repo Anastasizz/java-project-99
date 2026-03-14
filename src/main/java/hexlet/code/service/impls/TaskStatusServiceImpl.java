@@ -1,24 +1,22 @@
-package hexlet.code.service;
+package hexlet.code.service.impls;
 
 import hexlet.code.dto.TaskStatusCreateDTO;
 import hexlet.code.dto.TaskStatusDTO;
 import hexlet.code.dto.TaskStatusUpdateDTO;
-import hexlet.code.exception.EntityInUseException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.repository.TaskStatusRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import hexlet.code.service.interfaces.TaskStatusService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
-public class TaskStatusService {
-    @Autowired
-    private TaskStatusRepository taskStatusRepository;
+@AllArgsConstructor
+public class TaskStatusServiceImpl implements TaskStatusService {
 
-    @Autowired
-    TaskStatusMapper taskStatusMapper;
+    private final TaskStatusRepository taskStatusRepository;
+    private final TaskStatusMapper taskStatusMapper;
 
     public TaskStatusDTO getTaskStatusById(Long id) {
         var taskStatus = taskStatusRepository.findById(id)
@@ -30,7 +28,7 @@ public class TaskStatusService {
         var taskStatuses = taskStatusRepository.findAll();
 
         return taskStatuses.stream()
-                .map(status -> taskStatusMapper.map(status))
+                .map(taskStatusMapper::map)
                 .toList();
     }
 
@@ -51,10 +49,6 @@ public class TaskStatusService {
     }
 
     public void deleteTaskStatus(Long id) {
-        try {
-            taskStatusRepository.deleteById(id);
-        } catch (RuntimeException ex) {
-            throw new EntityInUseException("Status is used in tasks");
-        }
+        taskStatusRepository.deleteById(id);
     }
 }

@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -249,6 +250,7 @@ public class TaskControllerTest {
                         .with(token)
                         .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                         .content(om.writeValueAsString(dto)))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         var updated = taskRepository.findById(testTask.getId()).orElseThrow();

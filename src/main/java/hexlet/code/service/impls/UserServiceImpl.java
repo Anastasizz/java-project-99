@@ -1,29 +1,25 @@
-package hexlet.code.service;
+package hexlet.code.service.impls;
 
 import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.dto.UserDTO;
 import hexlet.code.dto.UserUpdateDTO;
-import hexlet.code.exception.EntityInUseException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import hexlet.code.service.interfaces.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class UserService {
+@AllArgsConstructor
+public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     public UserDTO createUser(UserCreateDTO userData) {
         var user = userMapper.map(userData);
@@ -37,7 +33,7 @@ public class UserService {
     public List<UserDTO> getAllUsers() {
         var users = userRepository.findAll();
         return users.stream()
-                .map(user -> userMapper.map(user))
+                .map(userMapper::map)
                 .toList();
     }
 
@@ -48,11 +44,7 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        try {
-            userRepository.deleteById(id);
-        } catch (RuntimeException ex) {
-            throw new EntityInUseException("User is used in tasks");
-        }
+        userRepository.deleteById(id);
     }
 
     public UserDTO updateUser(UserUpdateDTO userData, Long id) {
