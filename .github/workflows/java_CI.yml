@@ -23,6 +23,14 @@ jobs:
         with:
           gradle-version: 8.7
 
+      - name: Check Sentry token presence
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo "SENTRY_AUTH_TOKEN is EMPTY"
+          else
+            echo "SENTRY_AUTH_TOKEN is PRESENT"
+          fi
+
       - name: Print Gradle task graph
         run: ./gradlew build --dry-run
 
