@@ -7,6 +7,7 @@ import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.util.ModelGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.MediaType;
@@ -16,10 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import org.springframework.test.web.servlet.MockMvc;
-
-import org.instancio.Instancio;
-import org.instancio.Select;
-import net.datafaker.Faker;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,9 +52,6 @@ public class UsersControllerTest {
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private Faker faker;
-
     private User testUser;
     private JwtRequestPostProcessor token;
 
@@ -66,7 +60,7 @@ public class UsersControllerTest {
         taskRepository.deleteAll();
         userRepository.deleteAll();
 
-        testUser = userBuild();
+        testUser = ModelGenerator.generateUser();
 
         userRepository.save(testUser);
 
@@ -110,7 +104,7 @@ public class UsersControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var userData = userBuild();
+        var userData = ModelGenerator.generateUser();
         var request = post("/api/users").with(token)
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
                 .content(om.writeValueAsString(userData));
@@ -156,13 +150,4 @@ public class UsersControllerTest {
         assertThat(updatedUser.getFirstName()).isEqualTo("Lolly");
     }
 
-    private User userBuild() {
-        return Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getCreatedAt))
-                .ignore(Select.field(User::getUpdatedAt))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password(8, 16))
-                .create();
-    }
 }

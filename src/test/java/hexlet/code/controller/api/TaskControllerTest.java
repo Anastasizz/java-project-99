@@ -7,7 +7,6 @@ import hexlet.code.dto.TaskDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
-import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
@@ -15,10 +14,8 @@ import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.util.ModelGenerator;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
-import org.instancio.Instancio;
-import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.MediaType;
@@ -69,9 +66,6 @@ public class TaskControllerTest {
     private LabelRepository labelRepository;
 
     @Autowired
-    private Faker faker;
-
-    @Autowired
     private ObjectMapper om;
 
     private Task testTask;
@@ -87,21 +81,15 @@ public class TaskControllerTest {
         taskStatusRepository.deleteAll();
         userRepository.deleteAll();
 
-        testUser = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getCreatedAt))
-                .ignore(Select.field(User::getUpdatedAt))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password(8, 16))
-                .create();
+        testUser = ModelGenerator.generateUser();
 
         userRepository.save(testUser);
         token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
 
-        testTaskStatus = taskStatusBuilder();
+        testTaskStatus = ModelGenerator.generateTaskStatus();
         taskStatusRepository.save(testTaskStatus);
 
-        testTask = taskBuilder();
+        testTask = ModelGenerator.generateTask();
         testTask.setTaskStatus(testTaskStatus);
         testTask.setAssignee(testUser);
         taskRepository.save(testTask);
@@ -159,7 +147,7 @@ public class TaskControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var taskData = taskBuilder();
+        var taskData = ModelGenerator.generateTask();
         taskData.setTaskStatus(testTaskStatus);
         //taskData.setAssignee(testUser);
 
@@ -236,10 +224,7 @@ public class TaskControllerTest {
     @Test
     public void testUpdateAssignee() throws Exception {
 
-        var anotherUser = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+        var anotherUser = ModelGenerator.generateUser();
 
         userRepository.save(anotherUser);
 
@@ -262,7 +247,7 @@ public class TaskControllerTest {
     @Test
     public void testUpdateStatus() throws Exception {
 
-        var newStatus = taskStatusBuilder();
+        var newStatus = ModelGenerator.generateTaskStatus();
         taskStatusRepository.save(newStatus);
 
         var data = new HashMap<>();
@@ -282,13 +267,13 @@ public class TaskControllerTest {
 
     @Test
     public void testFilterByTitleContains() throws Exception {
-        var matchedTask = taskBuilder();
+        var matchedTask = ModelGenerator.generateTask();
         matchedTask.setName("create task");
         matchedTask.setTaskStatus(testTaskStatus);
         matchedTask.setAssignee(testUser);
         taskRepository.save(matchedTask);
 
-        var notMatchedTask = taskBuilder();
+        var notMatchedTask = ModelGenerator.generateTask();
         notMatchedTask.setName("another title");
         notMatchedTask.setTaskStatus(testTaskStatus);
         notMatchedTask.setAssignee(testUser);
@@ -310,16 +295,7 @@ public class TaskControllerTest {
 
     @Test
     public void testFilterByLabel() throws Exception {
-        var label = Instancio.of(Label.class)
-                .ignore(Select.field(Label::getId))
-                .supply(Select.field(Label::getName), () -> {
-                    String word;
-                    do {
-                        word = faker.lorem().word();
-                    } while (word.length() < 3);
-                    return word;
-                })
-                .create();
+        var label = ModelGenerator.generateLabel();
 
         labelRepository.save(label);
 
@@ -341,10 +317,10 @@ public class TaskControllerTest {
 
     @Test
     public void testFilterByStatus() throws Exception {
-        var anotherStatus = taskStatusBuilder();
+        var anotherStatus = ModelGenerator.generateTaskStatus();
         taskStatusRepository.save(anotherStatus);
 
-        var taskWithAnotherStatus = taskBuilder();
+        var taskWithAnotherStatus = ModelGenerator.generateTask();
         taskWithAnotherStatus.setTaskStatus(anotherStatus);
         taskWithAnotherStatus.setAssignee(testUser);
         taskRepository.save(taskWithAnotherStatus);
@@ -364,14 +340,11 @@ public class TaskControllerTest {
 
     @Test
     public void testFilterByAssignee() throws Exception {
-        var anotherUser = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .create();
+        var anotherUser = ModelGenerator.generateUser();
 
         userRepository.save(anotherUser);
 
-        var taskForAnotherUser = taskBuilder();
+        var taskForAnotherUser = ModelGenerator.generateTask();
         taskForAnotherUser.setAssignee(anotherUser);
         taskForAnotherUser.setTaskStatus(testTaskStatus);
         taskRepository.save(taskForAnotherUser);
@@ -389,24 +362,4 @@ public class TaskControllerTest {
                 .containsOnly(testUser.getId());
     }
 
-    private TaskStatus taskStatusBuilder() {
-        return Instancio.of(TaskStatus.class)
-                .ignore(Select.field(TaskStatus::getId))
-                .ignore(Select.field(TaskStatus::getCreatedAt))
-                .supply(Select.field(TaskStatus::getName), () -> faker.lorem().word())
-                .supply(Select.field(TaskStatus::getSlug), () -> faker.lorem().word())
-                .create();
-    }
-
-    private Task taskBuilder() {
-        return Instancio.of(Task.class)
-                .ignore(Select.field(Task::getId))
-                .ignore(Select.field(Task::getCreatedAt))
-                .ignore(Select.field(Task::getAssignee))
-                .supply(Select.field(Task::getIndex), () -> faker.number().numberBetween(1, 100))
-                .supply(Select.field(Task::getName), () -> String.join(" ", faker.lorem().words(2)))
-                .supply(Select.field(Task::getDescription), () -> String.join(" ", faker.lorem().words(4)))
-                .ignore(Select.field(Task::getLabels))
-                .create();
-    }
 }

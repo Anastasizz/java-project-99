@@ -10,10 +10,8 @@ import hexlet.code.model.User;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.util.ModelGenerator;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
-import org.instancio.Instancio;
-import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.MediaType;
@@ -59,9 +57,6 @@ public class LabelControllerTest {
     private LabelMapper labelMapper;
 
     @Autowired
-    private Faker faker;
-
-    @Autowired
     private ObjectMapper om;
 
     private Label testLabel;
@@ -75,16 +70,10 @@ public class LabelControllerTest {
         labelRepository.deleteAll();
         userRepository.deleteAll();
 
-        testLabel = labelBuilder();
+        testLabel = ModelGenerator.generateLabel();
         labelRepository.save(testLabel);
 
-        testUser = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getCreatedAt))
-                .ignore(Select.field(User::getUpdatedAt))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password(8, 16))
-                .create();
+        testUser = ModelGenerator.generateUser();
 
         userRepository.save(testUser);
 
@@ -138,7 +127,7 @@ public class LabelControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var labelData = labelMapper.map(labelBuilder());
+        var labelData = labelMapper.map(ModelGenerator.generateLabel());
 
         var request = post("/api/labels").with(token)
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
@@ -185,17 +174,4 @@ public class LabelControllerTest {
 
     }
 
-    private Label labelBuilder() {
-        return Instancio.of(Label.class)
-                .ignore(Select.field(Label::getId))
-                .ignore(Select.field(Label::getCreatedAt))
-                .supply(Select.field(Label::getName), () -> {
-                    String word;
-                    do {
-                        word = faker.lorem().word();
-                    } while (word.length() < 3);
-                    return word;
-                })
-                .create();
-    }
 }

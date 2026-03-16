@@ -9,10 +9,8 @@ import hexlet.code.model.User;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.util.ModelGenerator;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
-import org.instancio.Instancio;
-import org.instancio.Select;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.MediaType;
@@ -59,9 +57,6 @@ public class TaskStatusesControllerTest {
     private TaskRepository taskRepository;
 
     @Autowired
-    private Faker faker;
-
-    @Autowired
     private ObjectMapper om;
 
     private TaskStatus testTaskStatus;
@@ -75,16 +70,10 @@ public class TaskStatusesControllerTest {
         taskStatusRepository.deleteAll();
         userRepository.deleteAll();
 
-        testTaskStatus = taskStatusBuilder();
+        testTaskStatus = ModelGenerator.generateTaskStatus();
         taskStatusRepository.save(testTaskStatus);
 
-        testUser = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .ignore(Select.field(User::getCreatedAt))
-                .ignore(Select.field(User::getUpdatedAt))
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPasswordDigest), () -> faker.internet().password(8, 16))
-                .create();
+        testUser = ModelGenerator.generateUser();
 
         userRepository.save(testUser);
 
@@ -138,7 +127,7 @@ public class TaskStatusesControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var taskStatusData = taskStatusMapper.map(taskStatusBuilder());
+        var taskStatusData = taskStatusMapper.map(ModelGenerator.generateTaskStatus());
 
         var request = post("/api/task_statuses").with(token)
                 .contentType(String.valueOf(MediaType.APPLICATION_JSON))
@@ -184,12 +173,4 @@ public class TaskStatusesControllerTest {
 
     }
 
-    private TaskStatus taskStatusBuilder() {
-        return Instancio.of(TaskStatus.class)
-                .ignore(Select.field(TaskStatus::getId))
-                .ignore(Select.field(TaskStatus::getCreatedAt))
-                .supply(Select.field(TaskStatus::getName), () -> faker.lorem().word())
-                .supply(Select.field(TaskStatus::getSlug), () -> faker.lorem().word())
-                .create();
-    }
 }
