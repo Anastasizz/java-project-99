@@ -89,9 +89,9 @@ tasks.sentryBundleSourcesJava {
 	enabled = System.getenv("SENTRY_AUTH_TOKEN") != null
 }
 
-tasks.bootJar {
-	archiveBaseName.set("app")
-}
+//tasks.bootJar {
+//	archiveBaseName.set("app")
+//}
 
 tasks.test {
 	useJUnitPlatform()
