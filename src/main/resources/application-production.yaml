@@ -10,3 +10,7 @@ spring:
       ddl-auto: validate        # в продакшне не меняем схему автоматически
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false              # не показываем SQL в логах продакшна
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
