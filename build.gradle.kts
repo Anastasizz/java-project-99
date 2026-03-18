@@ -66,24 +66,24 @@ sonar {
 	}
 }
 
-sentry {
-	// Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
-	// This enables source context, allowing you to see your source
-	// code as part of your stack traces in Sentry.
-	includeSourceContext = true
-	//autoUploadSourceContext = false
-
-	org = "lolly-3r"
-	projectName = "java-spring-boot2"
-	authToken = System.getenv("SENTRY_AUTH_TOKEN")
-}
-
 //sentry {
+//	// Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+//	// This enables source context, allowing you to see your source
+//	// code as part of your stack traces in Sentry.
 //	includeSourceContext = true
-//	org = "hexlet-777"
-//	projectName = "java-spring-boot"
+//	//autoUploadSourceContext = false
+//
+//	org = "lolly-3r"
+//	projectName = "java-spring-boot2"
 //	authToken = System.getenv("SENTRY_AUTH_TOKEN")
 //}
+
+sentry {
+	includeSourceContext = true
+	org = "hexlet-777"
+	projectName = "java-spring-boot"
+	authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
 
 tasks.sentryBundleSourcesJava {
 	enabled = System.getenv("SENTRY_AUTH_TOKEN") != null
