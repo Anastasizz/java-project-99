@@ -3,7 +3,7 @@ repositories {
 }
 
 plugins {
-	id("org.springframework.boot") version "3.5.9"
+	id("org.springframework.boot") version "3.4.13"
 	id("io.spring.dependency-management") version "1.1.7"
 
 	application
@@ -50,7 +50,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	testImplementation("org.springframework.security:spring-security-test")
 
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 	implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.33.0")
 }
 
