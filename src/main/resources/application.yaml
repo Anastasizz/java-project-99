@@ -7,10 +7,6 @@ spring:
       hibernate:
         ddl-auto: update
 
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
-
 # src/main/resources/certs/
 rsa:
   private-key: classpath:certs/private.pem
